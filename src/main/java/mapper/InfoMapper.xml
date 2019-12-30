@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.InfoMapper">
+    <select id="selectScoreInfo" resultType="javabean.ScoreInfo">
+        select subjectId,studentId,studentScore,modifyTime from ScoreInfo
+    </select>
+    <select id="selectStudentInfo" resultType="javabean.StudentInfo">
+        select specialty,grade,studentNo,studentName,studentSex from StudentInfo
+    </select>
+    <select id="selectSubjectInfo" resultType="javabean.SubjectInfo">
+        select subjectName from SubjectInfo
+    </select>
+    <!--    查询整条信息-->
+    <select id="selectTotalInfo" resultType="javabean.TotalInfo">
+        select specialty,grade,studentNo,studentName,studentSex,studentScore,modifyTime,subjectName
+        from ScoreInfo, StudentInfo, SubjectInfo
+        where ScoreInfo.subjectId = SubjectInfo.subjectId and ScoreInfo.studentId = StudentInfo.studentId
+    </select>
+    <!--    StudentInfo插入-->
+    <insert id="insertStudentInfo" parameterType="javabean.StudentInfo" useGeneratedKeys="true" keyProperty="studentId">
+        insert into StudentInfo(specialty,grade,studentNo,studentName,studentSex)
+        values (#{specialty}, #{grade}, #{studentNo}, #{studentName}, #{studentSex})
+    </insert>
+    <!--    ScoreInfo插入-->
+    <insert id="insertScoreInfo" parameterType="javabean.ScoreInfo" useGeneratedKeys="true" keyProperty="scoreId">
+        insert into ScoreInfo(subjectId,studentId,studentScore,modifyTime)
+        values (#{subjectId}, #{studentId}, #{studentScore}, #{modifyTime})
+    </insert>
+    <!--    查找studentId-->
+    <select id="selectStudentId" resultType="Long" parameterType="String">
+        select studentId
+        from StudentInfo
+        where studentNo = #{studentNo}
+    </select>
+    <!--    查找subjectId-->
+    <select id="selectSubjectId" resultType="Long" parameterType="String">
+        select subjectId
+        from SubjectInfo
+        where subjectName = #{subjectName}
+    </select>
+    <!--    查找studentName-->
+    <select id="selectStudentName" resultType="String" parameterType="String">
+        select  studentName
+        from StudentInfo
+        where studentNo = #{studentNo}
+    </select>
+    <!--    更新学生成绩-->
+    <update id="updateStudentScore" parameterType="ScoreInfo">
+        update ScoreInfo
+        set studentScore = #{studentScore}
+        where studentId = #{studentId} and subjectId = #{subjectId}
+    </update>
+    <!--    删除学生成绩-->
+    <delete id="deleteStudentScore" parameterType="ScoreInfo">
+        delete from ScoreInfo
+        where studentId = #{studentId} and subjectId = #{subjectId}
+    </delete>
+</mapper>

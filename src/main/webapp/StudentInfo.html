@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>学生成绩录入系统</title>
+    <link href="webjars/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="table">
+    <h5 class="col-auto">
+        学生成绩列表
+    </h5>
+    <table class="table table-bordered" id="table">
+        <thead>
+        <tr>
+            <th>专业</th>
+            <th>年级</th>
+            <th>学号</th>
+            <th>姓名</th>
+            <th>性别</th>
+            <th>科目</th>
+            <th>成绩</th>
+            <th colspan="2">操作</th>
+        </tr>
+        </thead>
+        <tbody id="tbody1">
+        <tr class="caserow" id="tr1">
+            <td>计算机</td>
+            <td>2016</td>
+            <td>20160101</td>
+            <td>张三</td>
+            <td>男</td>
+            <td>数据结构</td>
+            <td>85</td>
+            <td><a href="#" class="modify">修改</a></td>
+            <td><a href="#" class="delete">删除</a></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div class="align-bottom col-auto" style="text-align:right">
+    <button type="button" class="btn btn-primary btn-sm" id="insertButton">新增</button>
+</div>
+<div>
+    <form class="form-horizontal" role="form">
+        <h3 class="col-auto"> 学生信息录入 </h3>
+        <hr/>
+        <div class="form-group">
+            <label class="col-auto">专业:</label>
+            <!--单选框的名字对每组单选框有影响-->
+            <label for="optionRadio1" class="col-auto">
+                <input type="radio" name="specialtyOptionsRadios" id="optionRadio1" value="计算机" checked>
+                计算机</label>
+            <label for="optionRadio2" class="col-auto">
+                <input type="radio" name="specialtyOptionsRadios" id="optionRadio2" value="物联网">
+                物联网</label>
+            <label for="optionRadio3" class="col-auto">
+                <input type="radio" name="specialtyOptionsRadios" id="optionRadio3" value="通信">
+                通信</label>
+        </div>
+        <div class="form-group">
+            <label class="col-auto">年级:</label>
+            <label class="col-auto">
+                <select class="form-control" id="select">
+                    <option selected="selected" value="2015">2015</option>
+                    <option value="2016">2016</option>
+                    <option value="2017">2017</option>
+                    <option value="2018">2018</option>
+                    <option value="2019">2019</option>
+                </select>
+            </label>
+        </div>
+        <div class="form-group">
+            <label for="studentID" class="col-auto">学号:</label>
+            <label for="studentID" class="col-auto">
+                <input type="text" class="form-control" id="studentID" placeholder="请输入学号" style="width:200px">
+            </label>
+        </div>
+        <div class="form-group">
+            <label for="name" class="col-auto">姓名:</label>
+            <label class="col-auto">
+                <input type="text" class="form-control" id="name" placeholder="请输入姓名" style="width:200px">
+            </label>
+        </div>
+        <div class="form-group">
+            <label class="col-auto">性别:</label>
+            <label for="optionRadio4" class="col-auto">
+                <input type="radio" name="genderOptionsRadios" id="optionRadio4" value="男" checked>
+                男 </label>
+            <label for="optionRadio5" class="col-auto">
+                <input type="radio" name="genderOptionsRadios" id="optionRadio5" value="女">
+                女 </label>
+        </div>
+        <div class="form-group">
+            <label class="col-auto">科目:</label>
+            <label for="optionRadio6" class="col-auto">
+                <input type="radio" name="classOptionsRadios" id="optionRadio6" value="大学英语" checked>
+                大学英语</label>
+            <label for="optionRadio7" class="col-auto">
+                <input type="radio" name="classOptionsRadios" id="optionRadio7" value="高等数学">
+                高等数学</label>
+            <label for="optionRadio8" class="col-auto">
+                <input type="radio" name="classOptionsRadios" id="optionRadio8" value="Java语言程序设计">
+                Java语言程序设计</label>
+        </div>
+        <div class="form-group">
+            <label for="Grade" class="col-auto">成绩:</label>
+            <label class="col-auto">
+                <input type="text" class="form-control" id="Grade" placeholder="请输入成绩" style="width:200px">
+            </label>
+        </div>
+        <div class="align-bottom col-auto">
+            <button type="button" class="btn btn-primary btn-sm" id="submitButton">提交</button>
+        </div>
+    </form>
+</div>
+<script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script>
+<script>
+    var modifyOrNot = false;//不按修改为false
+    $(document).ready(function () {
+        refresh();
+    });
+    $("#studentID").on("input propertyChange", function () {//监听
+        $.ajax({
+            type: "GET",
+            data: {"studentNo": $("#studentID").val()},
+            dataType: "json",
+            url: "jsp/SelectStudentName.jsp",
+            success: function (result) {
+                // var js = JSON.parse(result);
+                $("#name").val(result.studentName);
+            },
+            error: function () {
+                // alert("出错");
+            }
+        });
+
+    });
+    $("#submitButton").click(function () {
+        if (modifyOrNot == false) {
+            $.get("jsp/SelectInfo.jsp", function (result) {
+                var infos = JSON.parse(result);
+                var specialty, grade, studentNo, studentName, studentSex, subjectName, studentScore;
+                var subjectArray = new Array();
+                var subjectNameSame = false;
+                for (var index in infos) {
+                    subjectArray[index] = infos[index].subjectName;
+                    if (infos[index].studentNo == $("#studentID").val()) {
+                        specialty = infos[index].specialty;
+                        grade = infos[index].grade;//年级
+                        studentNo = infos[index].studentNo;
+                        studentName = infos[index].studentName;
+                        studentSex = infos[index].studentSex;
+                        // subjectName = infos[index].subjectName;
+                        studentScore = infos[index].studentScore;
+                        break;
+                    }
+                }
+                for (var index in subjectArray) {
+                    if (subjectArray[index] == $("input[name='classOptionsRadios']:checked").val()) {
+                        subjectNameSame = true;
+                    }
+                }
+                if (studentNo != null && studentNo != "") {//说明数据库里找到此人
+                    if (specialty == $("input[name='specialtyOptionsRadios']:checked").val() &&
+                        grade == $("select#select option:selected").val() &&
+                        studentName == $("#name").val() &&
+                        studentSex == $("input[name='genderOptionsRadios']:checked").val()) {
+                        if (subjectNameSame == true)
+                            alert("增加信息重复或有误");
+                        else {//同一个人的不同科目的添加操作
+                            // var formData = new formData();
+                            // formData.append("studentNo",studentNo);
+                            // formData.append("subjectName",$("input[name='classOptionsRadios']:checked").val());
+                            // formData.append("studentNo",$("#Grade").val());
+                            $.ajax({
+                                type: "POST",
+                                // url: "http://localhost:8081/maventest/insertScoreInfo",
+                                url: "jsp/InsertScoreInfo.jsp",
+                                data: {
+                                    "studentNo": studentNo,
+                                    "subjectName": $("input[name='classOptionsRadios']:checked").val(),
+                                    "studentScore": $("#Grade").val()
+                                },
+                                success: function (result) {
+                                    alert(result);
+                                    refresh();
+                                    $("#studentID").val("");
+                                    $("#name").val("");
+                                    $("#Grade").val("");
+                                },
+                                error: function () {
+                                    alert("出错");
+                                    refresh();
+                                }
+                            })
+                        }
+                    } else alert("增加信息重复或有误");
+                } else {//数据库里没有查到此人
+                    $.ajax({
+                        type: "POST",
+                        url: "jsp/InsertTotalInfo.jsp",
+                        data: {
+                            "specialty": $("input[name='specialtyOptionsRadios']:checked").val(),
+                            "grade": $("select#select option:selected").val(),
+                            "studentNo": $("#studentID").val(),
+                            "studentName": $("#name").val(),
+                            "studentSex": $("input[name='genderOptionsRadios']:checked").val(),
+                            "subjectName": $("input[name='classOptionsRadios']:checked").val(),
+                            "studentScore": $("#Grade").val()
+                        },
+                        success: function (result) {
+                            alert(result);
+                            refresh();
+                            $("#studentID").val("");
+                            $("#name").val("");
+                            $("#Grade").val("");
+                        },
+                        error: function () {
+                            alert("出错");
+                            refresh();
+                        }
+                    })
+                }
+            });
+
+        } else {
+            $.ajax({
+                type:"POST",
+                url:"jsp/UpdateStudentScore.jsp",
+                data: {
+                    "specialty": $("input[name='specialtyOptionsRadios']:checked").val(),
+                    "grade": $("select#select option:selected").val(),
+                    "studentNo": $("#studentID").val(),
+                    "studentName": $("#name").val(),
+                    "studentSex": $("input[name='genderOptionsRadios']:checked").val(),
+                    "subjectName": $("input[name='classOptionsRadios']:checked").val(),
+                    "studentScore": $("#Grade").val()
+                },
+                success: function (result) {
+                    alert(result);
+                    refresh();
+                    $("#studentID").val("");
+                    $("#name").val("");
+                    $("#Grade").val("");
+                },
+                error: function () {
+                    alert("出错");
+                    refresh();
+                }
+            });
+            modifyOrNot = false;
+        }
+    });
+
+    $("#tbody1").on("click", ".modify", function () {
+        var studentNo = $(this).parent().siblings().eq(2).text();
+        var specialty = $(this).parent().siblings().eq(0).text();
+        var grade = $(this).parent().siblings().eq(1).text();
+        var studentName = $(this).parent().siblings().eq(3).text();
+        var studentSex = $(this).parent().siblings().eq(4).text();
+        var subjectName = $(this).parent().siblings().eq(5).text();
+        var studentScore = $(this).parent().siblings().eq(6).text();
+        $("#studentID").val(studentNo);
+        $("#name").val(studentName);
+        $("#Grade").val("");
+        if (specialty == "计算机") {
+            $("#optionRadio1").attr('checked', true);
+        } else if (specialty == "物联网") $("#optionRadio2").attr('checked', true);
+        else $("#optionRadio3").attr('checked', true);
+
+        if (studentSex == "男") $("#optionRadio4").attr('checked', true);
+        else $("#optionRadio5").attr('checked', true);
+
+        if (subjectName == "数据结构") $("#optionRadio6").attr('checked', true);
+        else if (subjectName == "C语言程序设计") $("#optionRadio7").attr('checked', true);
+        else $("#optionRadio8").attr('checked', true);
+
+        alert("只能修改成绩");
+        modifyOrNot = true;
+
+    });
+
+    $("#tbody1").on("click",".delete",function () {
+        $.ajax({
+            type:"POST",
+            url:"jsp/DeleteInfo.jsp",
+            data:{
+                "studentNo":$(this).parent().siblings().eq(2).text(),
+                "subjectName":$(this).parent().siblings().eq(5).text(),
+            },
+            success:function (result) {
+                alert(result);
+                refresh();
+            },
+            error:function () {
+                alert("请求失败");
+                refresh();
+            }
+        })
+    })
+
+    //刷新页面相当于先删除表格行再进行添加
+    function refresh() {
+        $.get("jsp/SelectInfo.jsp", function (result) {
+            $("#tbody1").find("tr").remove();
+            var infos = JSON.parse(result);
+            //var table = $("#table");
+            for (var index in infos) {
+                var str = "<tr><td>" + infos[index].specialty + "</td><td>" + infos[index].grade + "</td><td>" + infos[index].studentNo + "</td><td>" + infos[index].studentName + "</td><td>" + infos[index].studentSex + "</td><td>" + infos[index].subjectName + "</td><td>" + infos[index].studentScore + "</td><td><a href='#' class='modify'>修改</a></td><td><a href='#' class='delete'>删除</a></td></tr>";
+                $("#tbody1").append(str);
+                // var newRow = table.insertRow(table.rows.length);
+                // var col0 = newRow.insertCell(0);
+                // var col1 = newRow.insertCell(1);
+                // var col2 = newRow.insertCell(2);
+                // var col3 = newRow.insertCell(3);
+                // var col4 = newRow.insertCell(4);
+                // var col5 = newRow.insertCell(5);
+                // var col6 = newRow.insertCell(6);
+                // var col7 = newRow.insertCell(7);
+                // var col8 = newRow.insertCell(8);
+                // col0.innerHTML = infos[index].specialty;
+                // col1.innerHTML = infos[index].grade;
+                // col2.innerHTML = infos[index].studentNo;
+                // col3.innerHTML = infos[index].studentName;
+                // col4.innerHTML = infos[index].studentSex;
+                // col5.innerHTML = infos[index].subjectName;
+                // col6.innerHTML = infos[index].studentScore;
+                // col7.innerHTML = "<td><a href=\"#\" class=\"modify\">修改</a></td>";
+                // col8.innerHTML = "<td><a href=\"#\" class=\"modify\">删除</a></td>";
+            }
+        });
+    }
+
+</script>
+</body>
+</html>
